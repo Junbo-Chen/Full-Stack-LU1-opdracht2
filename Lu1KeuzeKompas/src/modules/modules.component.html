@@ -1,0 +1,26 @@
+<div class="container">
+  <h2>Keuzemodules</h2>
+  <table border="1" cellpadding="5">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Naam</th>
+        <th>Korte Omschrijving</th>
+        <th>Studiepunten</th>
+        <th>Locatie</th>
+        <th>Niveau</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let m of modules">
+        <td>{{ m?.id }}</td>
+        <td>{{ m?.name }}</td>
+        <td>{{ m?.shortdescription }}</td>
+        <td>{{ m?.studycredit }}</td>
+        <td>{{ m?.location }}</td>
+        <td>{{ m?.level }}</td>
+       </tr>
+    </tbody>
+  </table>
+</div>
+    
