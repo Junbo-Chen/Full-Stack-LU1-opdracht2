@@ -1,0 +1,169 @@
+<div class="container">
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <h2>📚 Module Overzicht</h2>
+      <p class="subtitle">Ontdek alle beschikbare keuzevakken</p>
+    </div>
+    
+    <button class="btn-filter" (click)="toggleFilters()">
+      <span>🔍 Filters</span>
+      @if (activeFiltersCount() > 0) {
+        <span class="badge">{{ activeFiltersCount() }}</span>
+      }
+    </button>
+  </div>
+
+  <!-- Favorite Summary -->
+  @if (favoriteCount() > 0) {
+    <div class="favorite-summary">
+      ⭐ Je hebt <strong>{{ favoriteCount() }}</strong> favoriet{{ favoriteCount() !== 1 ? 'en' : '' }}
+    </div>
+  }
+
+  <!-- Filters Section -->
+  @if (showFilters()) {
+    <div class="filters">
+      <!-- Search -->
+      <input
+        type="text"
+        class="search-input"
+        placeholder="🔍 Zoek op naam of beschrijving..."
+        [ngModel]="searchTerm()"
+        (ngModelChange)="searchTerm.set($event); onSearchChange()"
+      />
+
+      <!-- Credit Filter -->
+      <select
+        class="filter-select"
+        [ngModel]="selectedCredit()"
+        (ngModelChange)="selectedCredit.set($event); onFilterChange()"
+      >
+        <option [ngValue]="undefined">Alle studiepunten</option>
+        @for (credit of availableCredits; track credit) {
+          <option [ngValue]="credit">{{ credit }} EC</option>
+        }
+      </select>
+
+      <!-- Level Filter -->
+      <select
+        class="filter-select"
+        [ngModel]="selectedLevel()"
+        (ngModelChange)="selectedLevel.set($event); onFilterChange()"
+      >
+        <option value="">Alle niveaus</option>
+        @for (level of availableLevels; track level) {
+          <option [value]="level">{{ level }}</option>
+        }
+      </select>
+
+      <!-- Location Filter -->
+      <select
+        class="filter-select"
+        [ngModel]="selectedLocation()"
+        (ngModelChange)="selectedLocation.set($event); onFilterChange()"
+      >
+        <option value="">Alle locaties</option>
+        @for (location of availableLocations(); track location) {
+          <option [value]="location">{{ location }}</option>
+        }
+      </select>
+
+      <!-- Clear Button -->
+      @if (activeFiltersCount() > 0) {
+        <button class="btn-clear" (click)="clearFilters()">
+          ✕ Wis filters
+        </button>
+      }
+    </div>
+  }
+
+  <!-- Results Info -->
+  <div class="results-info">
+    <p>{{ getResultText() }}</p>
+  </div>
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>Modules laden...</p>
+    </div>
+  }
+
+  <!-- No Results -->
+  @else if (filteredModules().length === 0) {
+    <div class="no-results">
+      <div class="no-results-icon">🔍</div>
+      <h3>Geen modules gevonden</h3>
+      <p>Probeer andere filters of wis de huidige filters.</p>
+      @if (activeFiltersCount() > 0) {
+        <button class="btn-clear-large" (click)="clearFilters()">
+          Alle filters wissen
+        </button>
+      }
+    </div>
+  }
+
+  <!-- Modules Table -->
+  @else {
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th class="favorite-column">⭐</th>
+            <th>Module Naam</th>
+            <th>Beschrijving</th>
+            <th class="center">EC</th>
+            <th>Niveau</th>
+            <th>Locatie</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (module of filteredModules(); track module.id) {
+            <tr class="module-row">
+              <!-- Favorite Button -->
+              <td class="favorite-cell">
+                <button
+                  class="btn-favorite"
+                  [class.is-favorite]="isFavorite(module.id)"
+                  (click)="toggleFavorite($event, module.id)"
+                  [title]="isFavorite(module.id) ? 'Verwijder van favorieten' : 'Toevoegen aan favorieten'"
+                >
+                  {{ isFavorite(module.id) ? '⭐' : '☆' }}
+                </button>
+              </td>
+
+              <!-- Module Name -->
+              <td class="name-cell">
+                <strong>{{ module.name }}</strong>
+              </td>
+
+              <!-- Description -->
+              <td class="description-cell">
+                {{ module.shortDescription }}
+              </td>
+
+              <!-- Credits -->
+              <td class="credit-cell center">
+                <span class="badge-credit">{{ module.studyCredit }}</span>
+              </td>
+
+              <!-- Level -->
+              <td class="level-cell">
+                <span class="badge-level" [ngClass]="getLevelBadgeClass(module.level)">
+                  {{ module.level }}
+                </span>
+              </td>
+
+              <!-- Location -->
+              <td class="location-cell">
+                <span class="location-text">📍 {{ module.location }}</span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

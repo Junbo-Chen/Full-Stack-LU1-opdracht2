@@ -12,6 +12,6 @@ import { Module as AvansModuleEntity, ModuleSchema } from './schemas/avansopdrac
   ],
   controllers: [ModuleController],
   providers: [ModuleService],
-  exports: [ModuleService], // <-- handig als je het later elders wilt gebruiken
+  exports: [ModuleService], 
 })
 export class AvansModule {}

@@ -1,8 +1,7 @@
 import { Routes } from '@angular/router';
-import { ModulesComponent } from '../modules/modules.component';
+import { ModulesComponent } from './modules/module.component';
 
-// export const routes: Routes = [];
 export const routes: Routes = [
-  { path: 'modules', component: ModulesComponent }, // <-- hier je component
-  { path: '', redirectTo: '/modules', pathMatch: 'full' }, // optioneel: default route
+  { path: 'modules', component: ModulesComponent },
+  { path: '', redirectTo: '/modules', pathMatch: 'full' },
 ];

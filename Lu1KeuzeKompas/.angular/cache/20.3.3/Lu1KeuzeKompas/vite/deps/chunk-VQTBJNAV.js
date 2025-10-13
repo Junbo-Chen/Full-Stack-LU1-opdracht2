@@ -1,4 +1,8 @@
 import {
+  XhrFactory,
+  parseCookieValue
+} from "./chunk-4X6VR2I6.js";
+import {
   APP_BOOTSTRAP_LISTENER,
   ApplicationRef,
   DOCUMENT,
@@ -31,35 +35,18 @@ import {
   ɵɵdefineInjector,
   ɵɵdefineNgModule,
   ɵɵinject
-} from "./chunk-LSR2SSZY.js";
+} from "./chunk-WQIXNC2W.js";
 import {
   Observable,
+  __objRest,
+  __spreadValues,
   concatMap,
   filter,
   finalize,
   map,
   of,
   switchMap
-} from "./chunk-RSS3ODKE.js";
-import {
-  __objRest,
-  __spreadValues
-} from "./chunk-H2SRQSE4.js";
-
-// node_modules/@angular/common/fesm2022/xhr.mjs
-function parseCookieValue(cookieStr, name) {
-  name = encodeURIComponent(name);
-  for (const cookie of cookieStr.split(";")) {
-    const eqIndex = cookie.indexOf("=");
-    const [cookieName, cookieValue] = eqIndex == -1 ? [cookie, ""] : [cookie.slice(0, eqIndex), cookie.slice(eqIndex + 1)];
-    if (cookieName.trim() === name) {
-      return decodeURIComponent(cookieValue);
-    }
-  }
-  return null;
-}
-var XhrFactory = class {
-};
+} from "./chunk-PJVWDKLX.js";
 
 // node_modules/@angular/common/fesm2022/module.mjs
 var HttpHandler = class {
@@ -2737,8 +2724,6 @@ function appendMissingHeadersDetection(url, headers, headersToInclude) {
 }
 
 export {
-  parseCookieValue,
-  XhrFactory,
   HttpHandler,
   HttpBackend,
   HttpHeaders,
@@ -2781,7 +2766,6 @@ export {
 };
 /*! Bundled license information:
 
-@angular/common/fesm2022/xhr.mjs:
 @angular/common/fesm2022/module.mjs:
 @angular/common/fesm2022/http.mjs:
   (**
@@ -2790,4 +2774,4 @@ export {
    * License: MIT
    *)
 */
-//# sourceMappingURL=chunk-VHLZEGYR.js.map
+//# sourceMappingURL=chunk-VQTBJNAV.js.map
