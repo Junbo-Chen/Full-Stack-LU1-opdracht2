@@ -3,7 +3,7 @@ import { Document } from 'mongoose';
 
 export type ModuleDocument = Module & Document;
 
-@Schema({ collection: 'modules' })
+@Schema({ collection: 'avansOpdracht', timestamps: true })
 export class Module {
   @Prop({ required: true })
   id: number;
