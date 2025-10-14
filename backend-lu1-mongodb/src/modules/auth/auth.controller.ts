@@ -1,6 +1,7 @@
-import { Controller, Post, Body, Get, UseGuards, Request } from '@nestjs/common';
+import { Controller, Post, Body, Get, UseGuards, Request, HttpException, HttpStatus } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import type { RegisterDto, LoginDto } from './auth.service';
+import { RegisterDto } from './dto/register.dto'; 
+import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
 
 @Controller('auth')
@@ -9,12 +10,42 @@ export class AuthController {
 
   @Post('register')
   async register(@Body() registerDto: RegisterDto) {
-    return this.authService.register(registerDto);
+    try {
+      console.log('🔵 Register endpoint hit');
+      
+      console.log('📦 Body received:', {
+        name: registerDto.name,
+        email: registerDto.email,
+        hasPassword: !!registerDto.password,
+        passwordLength: registerDto.password?.length,
+        rawBody: JSON.stringify(registerDto)
+      });
+      
+      const result = await this.authService.register(registerDto);
+      console.log('✅ Register success:', result.user.email);
+      return result;
+    } catch (error) {
+      console.error('❌ Register controller error:', error.message);
+      throw error;
+    }
   }
 
   @Post('login')
   async login(@Body() loginDto: LoginDto) {
-    return this.authService.login(loginDto);
+    try {
+      console.log('🔵 Login endpoint hit');
+      console.log('📦 Body received:', {
+        email: loginDto.email,
+        hasPassword: !!loginDto.password
+      });
+      
+      const result = await this.authService.login(loginDto);
+      console.log('✅ Login success:', result.user.email);
+      return result;
+    } catch (error) {
+      console.error('❌ Login controller error:', error.message);
+      throw error;
+    }
   }
 
   @UseGuards(JwtAuthGuard)
@@ -32,7 +63,6 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Post('logout')
   async logout() {
-    // Met JWT tokens gebeurt logout client-side door token te verwijderen
     return { message: 'Logged out successfully' };
   }
 }

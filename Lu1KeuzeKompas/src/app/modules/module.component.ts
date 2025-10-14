@@ -1,8 +1,10 @@
-import { Component, OnInit, signal, computed } from '@angular/core';
+import { Component, OnInit, signal, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { ModuleService, ModuleFilters } from '../services/module.service';
 import { FavoriteService } from '../services/favorite.service';
+import { AuthService } from '../services/auth.service';
 import { Module } from '../../domain/module.entity';
 
 @Component({
@@ -44,17 +46,40 @@ export class ModulesComponent implements OnInit {
 
   constructor(
     private moduleService: ModuleService,
-    public favoriteService: FavoriteService
-  ) {}
+    public favoriteService: FavoriteService,
+    private authService: AuthService,
+    private router: Router
+  ) {
+    // Effect om favorieten te laden wanneer user inlogt
+    effect(() => {
+      const isAuthenticated = this.authService.isAuthenticated();
+      if (isAuthenticated) {
+        console.log('✅ User authenticated, loading favorites');
+        this.favoriteService.loadFavorites();
+      }
+    });
+  }
 
   ngOnInit(): void {
+    // Check of gebruiker ingelogd is
+    if (!this.authService.isLoggedIn()) {
+      console.warn('⚠️ User not logged in, redirecting...');
+      this.router.navigate(['/login']);
+      return;
+    }
+
+    const currentUser = this.authService.getCurrentUser();
+    console.log('👤 Current user:', currentUser);
+
     this.loadModules();
+    this.favoriteService.loadFavorites();
   }
 
   loadModules(): void {
     this.isLoading.set(true);
     this.moduleService.getModules().subscribe({
       next: (modules) => {
+        console.log('📚 Loaded modules:', modules.length);
         this.allModules.set(modules);
         this.filteredModules.set(modules);
         this.extractLocations(modules);
@@ -104,12 +129,21 @@ export class ModulesComponent implements OnInit {
   toggleFavorite(event: Event, moduleId: string): void {
     event.stopPropagation();
     
+    const currentUser = this.authService.getCurrentUser();
+    if (!currentUser) {
+      console.error('❌ No user logged in');
+      alert('Je moet ingelogd zijn om favorieten toe te voegen');
+      return;
+    }
+
+    console.log('🔄 Toggling favorite:', { userId: currentUser.id, moduleId });
+    
     this.favoriteService.toggleFavorite(moduleId).subscribe({
       next: () => {
-        console.log('Favorite toggled successfully');
+        console.log('✅ Favorite toggled successfully');
       },
       error: (err) => {
-        console.error('Error toggling favorite:', err);
+        console.error('❌ Error toggling favorite:', err);
         alert('Er ging iets mis. Probeer het opnieuw.');
       }
     });
@@ -139,5 +173,10 @@ export class ModulesComponent implements OnInit {
 
   getLevelBadgeClass(level: string): string {
     return level.includes('6') ? 'level-advanced' : 'level-beginner';
+  }
+
+  logout(): void {
+    this.favoriteService.clearFavorites();
+    this.authService.logout();
   }
 }

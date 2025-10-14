@@ -76,13 +76,22 @@
         </div>
       </div>
     }
+
+    <!-- Logout Button -->
+    <button 
+      class="btn-logout" 
+      (click)="logout()"
+      style="width: 100%; margin-top: 20px; padding: 12px; background: #e74c3c; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600;"
+    >
+      🚪 Uitloggen
+    </button>
   </aside>
 
   <!-- Main Content - Module Cards -->
   <main class="main-content">
     <div class="content-header">
       <div>
-        <h1> Module Overzicht</h1>
+        <h1>📚 Module Overzicht</h1>
         <p class="subtitle">{{ getResultText() }}</p>
       </div>
     </div>
