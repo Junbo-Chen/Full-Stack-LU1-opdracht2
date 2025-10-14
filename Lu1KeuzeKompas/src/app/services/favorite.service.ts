@@ -1,6 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface Favorite {
   _id?: string;
@@ -13,7 +14,7 @@ export interface Favorite {
   providedIn: 'root'
 })
 export class FavoriteService {
-  private apiUrl = 'http://localhost:3000/favorites';
+  private apiUrl = `${environment.backendUrl}/favorites`;
   
   // Signal om favorieten bij te houden
   private favoritesSignal = signal<Set<string>>(new Set());

@@ -1,0 +1,89 @@
+<div class="auth-container">
+  <div class="auth-card">
+    <div class="auth-header">
+      <h1>📝 Registreren</h1>
+      <p>Maak een account aan voor Lu1 KeuzeKompas</p>
+    </div>
+
+    <form (ngSubmit)="onSubmit()" class="auth-form">
+      @if (errorMessage()) {
+        <div class="error-message">
+          ⚠️ {{ errorMessage() }}
+        </div>
+      }
+
+      <div class="form-group">
+        <label for="name">Naam</label>
+        <input
+          type="text"
+          id="name"
+          [ngModel]="name()"
+          (ngModelChange)="name.set($event)"
+          name="name"
+          placeholder="Jouw naam"
+          required
+          [disabled]="isLoading()"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input
+          type="email"
+          id="email"
+          [ngModel]="email()"
+          (ngModelChange)="email.set($event)"
+          name="email"
+          placeholder="jouw@email.nl"
+          required
+          [disabled]="isLoading()"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="password">Wachtwoord</label>
+        <input
+          type="password"
+          id="password"
+          [ngModel]="password()"
+          (ngModelChange)="password.set($event)"
+          name="password"
+          placeholder="Minimaal 6 karakters"
+          required
+          [disabled]="isLoading()"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="confirmPassword">Bevestig wachtwoord</label>
+        <input
+          type="password"
+          id="confirmPassword"
+          [ngModel]="confirmPassword()"
+          (ngModelChange)="confirmPassword.set($event)"
+          name="confirmPassword"
+          placeholder="Herhaal wachtwoord"
+          required
+          [disabled]="isLoading()"
+        />
+      </div>
+
+      <button 
+        type="submit" 
+        class="btn-primary"
+        [disabled]="isLoading()"
+      >
+        @if (isLoading()) {
+          <span class="spinner-small"></span>
+          <span>Registreren...</span>
+        } @else {
+          <span>Registreren</span>
+        }
+      </button>
+    </form>
+
+    <div class="auth-footer">
+      <p>Al een account? <a routerLink="/login">Log hier in</a></p>
+    </div>
+  </div>
+</div>

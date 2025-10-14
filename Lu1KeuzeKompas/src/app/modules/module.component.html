@@ -1,51 +1,45 @@
-<div class="container">
-  <!-- Header -->
-  <div class="header">
-    <div class="header-left">
-      <h2>📚 Module Overzicht</h2>
-      <p class="subtitle">Ontdek alle beschikbare keuzevakken</p>
-    </div>
-    
-    <button class="btn-filter" (click)="toggleFilters()">
-      <span>🔍 Filters</span>
+<div class="page-container">
+  <!-- Left Sidebar - Filters -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h2>Filters</h2>
       @if (activeFiltersCount() > 0) {
-        <span class="badge">{{ activeFiltersCount() }}</span>
+        <button class="btn-clear-filters" (click)="clearFilters()">
+          <span>✕ Wis alle filters</span>
+        </button>
       }
-    </button>
-  </div>
-
-  <!-- Favorite Summary -->
-  @if (favoriteCount() > 0) {
-    <div class="favorite-summary">
-      ⭐ Je hebt <strong>{{ favoriteCount() }}</strong> favoriet{{ favoriteCount() !== 1 ? 'en' : '' }}
     </div>
-  }
 
-  <!-- Filters Section -->
-  @if (showFilters()) {
-    <div class="filters">
-      <!-- Search -->
+    <!-- Search -->
+    <div class="filter-group">
+      <label class="filter-label">Zoeken</label>
       <input
         type="text"
-        class="search-input"
-        placeholder="🔍 Zoek op naam of beschrijving..."
+        class="filter-input"
+        placeholder="Zoek op naam..."
         [ngModel]="searchTerm()"
         (ngModelChange)="searchTerm.set($event); onSearchChange()"
       />
+    </div>
 
-      <!-- Credit Filter -->
+    <!-- Credit Filter -->
+    <div class="filter-group">
+      <label class="filter-label">Studiepunten</label>
       <select
         class="filter-select"
         [ngModel]="selectedCredit()"
         (ngModelChange)="selectedCredit.set($event); onFilterChange()"
       >
-        <option [ngValue]="undefined">Alle studiepunten</option>
+        <option [ngValue]="undefined">Alle</option>
         @for (credit of availableCredits; track credit) {
           <option [ngValue]="credit">{{ credit }} EC</option>
         }
       </select>
+    </div>
 
-      <!-- Level Filter -->
+    <!-- Level Filter -->
+    <div class="filter-group">
+      <label class="filter-label">Niveau</label>
       <select
         class="filter-select"
         [ngModel]="selectedLevel()"
@@ -56,8 +50,11 @@
           <option [value]="level">{{ level }}</option>
         }
       </select>
+    </div>
 
-      <!-- Location Filter -->
+    <!-- Location Filter -->
+    <div class="filter-group">
+      <label class="filter-label">Locatie</label>
       <select
         class="filter-select"
         [ngModel]="selectedLocation()"
@@ -68,102 +65,87 @@
           <option [value]="location">{{ location }}</option>
         }
       </select>
-
-      <!-- Clear Button -->
-      @if (activeFiltersCount() > 0) {
-        <button class="btn-clear" (click)="clearFilters()">
-          ✕ Wis filters
-        </button>
-      }
     </div>
-  }
 
-  <!-- Results Info -->
-  <div class="results-info">
-    <p>{{ getResultText() }}</p>
-  </div>
+    <!-- Favorite Summary -->
+    @if (favoriteCount() > 0) {
+      <div class="favorite-summary">
+        <div class="favorite-icon">⭐</div>
+        <div class="favorite-text">
+          <strong>{{ favoriteCount() }}</strong> favoriet{{ favoriteCount() !== 1 ? 'en' : '' }}
+        </div>
+      </div>
+    }
+  </aside>
 
-  <!-- Loading State -->
-  @if (isLoading()) {
-    <div class="loading">
-      <div class="spinner"></div>
-      <p>Modules laden...</p>
+  <!-- Main Content - Module Cards -->
+  <main class="main-content">
+    <div class="content-header">
+      <div>
+        <h1> Module Overzicht</h1>
+        <p class="subtitle">{{ getResultText() }}</p>
+      </div>
     </div>
-  }
 
-  <!-- No Results -->
-  @else if (filteredModules().length === 0) {
-    <div class="no-results">
-      <div class="no-results-icon">🔍</div>
-      <h3>Geen modules gevonden</h3>
-      <p>Probeer andere filters of wis de huidige filters.</p>
-      @if (activeFiltersCount() > 0) {
-        <button class="btn-clear-large" (click)="clearFilters()">
-          Alle filters wissen
-        </button>
-      }
-    </div>
-  }
+    <!-- Loading State -->
+    @if (isLoading()) {
+      <div class="loading">
+        <div class="spinner"></div>
+        <p>Modules laden...</p>
+      </div>
+    }
 
-  <!-- Modules Table -->
-  @else {
-    <div class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th class="favorite-column">⭐</th>
-            <th>Module Naam</th>
-            <th>Beschrijving</th>
-            <th class="center">EC</th>
-            <th>Niveau</th>
-            <th>Locatie</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (module of filteredModules(); track module.id) {
-            <tr class="module-row">
-              <!-- Favorite Button -->
-              <td class="favorite-cell">
-                <button
-                  class="btn-favorite"
-                  [class.is-favorite]="isFavorite(module.id)"
-                  (click)="toggleFavorite($event, module.id)"
-                  [title]="isFavorite(module.id) ? 'Verwijder van favorieten' : 'Toevoegen aan favorieten'"
-                >
-                  {{ isFavorite(module.id) ? '⭐' : '☆' }}
-                </button>
-              </td>
+    <!-- No Results -->
+    @else if (filteredModules().length === 0) {
+      <div class="no-results">
+        <div class="no-results-icon">🔍</div>
+        <h3>Geen modules gevonden</h3>
+        <p>Probeer andere filters of wis de huidige filters.</p>
+        @if (activeFiltersCount() > 0) {
+          <button class="btn-clear-large" (click)="clearFilters()">
+            Alle filters wissen
+          </button>
+        }
+      </div>
+    }
 
-              <!-- Module Name -->
-              <td class="name-cell">
-                <strong>{{ module.name }}</strong>
-              </td>
+    <!-- Module Cards -->
+    @else {
+      <div class="cards-container">
+        @for (module of filteredModules(); track module.id) {
+          <div class="module-card">
+            <!-- Favorite Button -->
+            <button
+              class="card-favorite-btn"
+              [class.is-favorite]="isFavorite(module.id)"
+              (click)="toggleFavorite($event, module.id)"
+              [title]="isFavorite(module.id) ? 'Verwijder van favorieten' : 'Toevoegen aan favorieten'"
+            >
+              {{ isFavorite(module.id) ? '⭐' : '☆' }}
+            </button>
 
-              <!-- Description -->
-              <td class="description-cell">
-                {{ module.shortDescription }}
-              </td>
-
-              <!-- Credits -->
-              <td class="credit-cell center">
-                <span class="badge-credit">{{ module.studyCredit }}</span>
-              </td>
-
-              <!-- Level -->
-              <td class="level-cell">
-                <span class="badge-level" [ngClass]="getLevelBadgeClass(module.level)">
+            <!-- Card Content -->
+            <div class="card-header">
+              <h3 class="card-title">{{ module.name }}</h3>
+              <div class="card-badges">
+                <span class="badge badge-credit">{{ module.studyCredit }} EC</span>
+                <span class="badge badge-level" [ngClass]="getLevelBadgeClass(module.level)">
                   {{ module.level }}
                 </span>
-              </td>
+              </div>
+            </div>
 
-              <!-- Location -->
-              <td class="location-cell">
-                <span class="location-text">📍 {{ module.location }}</span>
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    </div>
-  }
+            <p class="card-description">{{ module.shortDescription }}</p>
+
+            <div class="card-footer">
+              <div class="card-location">
+                <span class="location-icon">📍</span>
+                <span>{{ module.location }}</span>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </main>
 </div>

@@ -17,7 +17,6 @@ export class ModulesComponent implements OnInit {
   allModules = signal<Module[]>([]);
   filteredModules = signal<Module[]>([]);
   isLoading = signal(true);
-  showFilters = signal(false);
 
   // Filter values
   searchTerm = signal('');
@@ -102,10 +101,6 @@ export class ModulesComponent implements OnInit {
     this.filteredModules.set(this.allModules());
   }
 
-  toggleFilters(): void {
-    this.showFilters.set(!this.showFilters());
-  }
-
   toggleFavorite(event: Event, moduleId: string): void {
     event.stopPropagation();
     
@@ -125,7 +120,6 @@ export class ModulesComponent implements OnInit {
   }
 
   onSearchChange(): void {
-    // Debounce zou hier kunnen worden toegevoegd
     this.applyFilters();
   }
 

@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { Module } from '../../domain/module.entity';
+import { environment } from '../../environments/environment';
 
 export interface ModuleFilters {
   searchTerm?: string;
@@ -14,7 +15,7 @@ export interface ModuleFilters {
   providedIn: 'root'
 })
 export class ModuleService {
-  private apiUrl = 'http://localhost:3000/modules';
+  private apiUrl = `${environment.backendUrl}/modules`;
 
   constructor(private http: HttpClient) {}
 

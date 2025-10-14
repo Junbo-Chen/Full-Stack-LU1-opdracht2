@@ -8,6 +8,7 @@ import { AppService } from './app.service';
 import { AvansModule } from './modules/avansopdracht/avans.module';
 import { FavoritesModule } from './modules/favorite/favorite.module';
 import { UsersModule } from './modules/users/users.module';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { UsersModule } from './modules/users/users.module';
     AvansModule,
     UsersModule,
     FavoritesModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
