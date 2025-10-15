@@ -1,0 +1,61 @@
+<div class="auth-container">
+  <div class="auth-card">
+    <div class="auth-header">
+      <h1>🔐 Inloggen</h1>
+      <p>Welkom terug bij Lu1 KeuzeKompas</p>
+    </div>
+
+    <form (ngSubmit)="onSubmit()" class="auth-form">
+      @if (errorMessage()) {
+        <div class="error-message">
+          ⚠️ {{ errorMessage() }}
+        </div>
+      }
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input
+          type="email"
+          id="email"
+          [ngModel]="email()"
+          (ngModelChange)="email.set($event)"
+          name="email"
+          placeholder="jouw@email.nl"
+          required
+          [disabled]="isLoading()"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="password">Wachtwoord</label>
+        <input
+          type="password"
+          id="password"
+          [ngModel]="password()"
+          (ngModelChange)="password.set($event)"
+          name="password"
+          placeholder="••••••••"
+          required
+          [disabled]="isLoading()"
+        />
+      </div>
+
+      <button 
+        type="submit" 
+        class="btn-primary"
+        [disabled]="isLoading()"
+      >
+        @if (isLoading()) {
+          <span class="spinner-small"></span>
+          <span>Inloggen...</span>
+        } @else {
+          <span>Inloggen</span>
+        }
+      </button>
+    </form>
+
+    <div class="auth-footer">
+      <p>Nog geen account? <a routerLink="/register">Registreer hier</a></p>
+    </div>
+  </div>
+</div>

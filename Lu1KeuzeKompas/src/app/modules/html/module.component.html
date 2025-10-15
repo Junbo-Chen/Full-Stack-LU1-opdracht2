@@ -1,0 +1,199 @@
+<div class="page-container">
+  <!-- Left Sidebar - Filters -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h2>Filters</h2>
+      <button 
+        class="btn-theme-toggle" 
+        (click)="toggleTheme()"
+        [title]="themeService.isDarkMode() ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
+      >
+        {{ themeService.isDarkMode() ? '☀️' : '🌙' }}
+      </button>
+    </div>
+
+    @if (activeFiltersCount() > 0) {
+      <button class="btn-clear-filters" (click)="clearFilters()">
+        <span>✕ Wis alle filters ({{ activeFiltersCount() }})</span>
+      </button>
+    }
+
+    <!-- Search -->
+    <div class="filter-group">
+      <label class="filter-label">🔍 Zoeken</label>
+      <input
+        type="text"
+        class="filter-input"
+        placeholder="Zoek op naam..."
+        [ngModel]="searchTerm()"
+        (ngModelChange)="searchTerm.set($event); onSearchChange()"
+      />
+    </div>
+
+    <!-- Credit Filter - Checkboxes -->
+    <div class="filter-group">
+      <label class="filter-label">
+        📊 Studiepunten
+        @if (selectedCredits().size > 0) {
+          <span class="filter-count">({{ selectedCredits().size }})</span>
+        }
+      </label>
+      <div class="checkbox-group">
+        @for (credit of availableCredits; track credit) {
+          <label class="checkbox-label">
+            <input
+              type="checkbox"
+              [checked]="isCreditSelected(credit)"
+              (change)="toggleCreditFilter(credit)"
+            />
+            <span class="checkbox-text">{{ credit }} EC</span>
+          </label>
+        }
+      </div>
+    </div>
+
+    <!-- Level Filter - Checkboxes -->
+    <div class="filter-group">
+      <label class="filter-label">
+        📈 Niveau
+        @if (selectedLevels().size > 0) {
+          <span class="filter-count">({{ selectedLevels().size }})</span>
+        }
+      </label>
+      <div class="checkbox-group">
+        @for (level of availableLevels; track level) {
+          <label class="checkbox-label">
+            <input
+              type="checkbox"
+              [checked]="isLevelSelected(level)"
+              (change)="toggleLevelFilter(level)"
+            />
+            <span class="checkbox-text">{{ level }}</span>
+          </label>
+        }
+      </div>
+    </div>
+
+    <!-- Location Filter - Checkboxes -->
+    <div class="filter-group">
+      <label class="filter-label">
+        📍 Locatie
+        @if (selectedLocations().size > 0) {
+          <span class="filter-count">({{ selectedLocations().size }})</span>
+        }
+      </label>
+      <div class="checkbox-group">
+        @for (location of availableLocationsList(); track location) {
+          <label class="checkbox-label">
+            <input
+              type="checkbox"
+              [checked]="isLocationSelected(location)"
+              (change)="toggleLocationFilter(location)"
+            />
+            <span class="checkbox-text">{{ location }}</span>
+          </label>
+        }
+      </div>
+    </div>
+
+    <!-- Favorite Summary - KLIKBAAR -->
+    @if (favoriteCount() > 0) {
+      <button 
+        class="favorite-summary"
+        [class.active]="showOnlyFavorites()"
+        (click)="toggleFavoritesFilter()"
+        title="Klik om alleen favorieten te tonen"
+      >
+        <div class="favorite-icon">⭐</div>
+          <strong>{{ favoriteCount() }}</strong> favoriet{{ favoriteCount() !== 1 ? 'en' : '' }}
+      </button>
+    }
+
+    <!-- Create Module Button -->
+    <button 
+      class="btn-create" 
+      (click)="navigateToCreate()"
+    >
+      ➕ Nieuwe Module
+    </button>
+
+    <!-- Logout Button -->
+    <button 
+      class="btn-logout" 
+      (click)="logout()"
+    >
+      🚪 Uitloggen
+    </button>
+  </aside>
+
+  <!-- Main Content - Module Cards -->
+  <main class="main-content">
+    <div class="content-header">
+      <div>
+        <h1>📚 Module Overzicht</h1>
+        <p class="subtitle">{{ getResultText() }}</p>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    @if (isLoading()) {
+      <div class="loading">
+        <div class="spinner"></div>
+        <p>Modules laden...</p>
+      </div>
+    }
+
+    <!-- No Results -->
+    @else if (filteredModules().length === 0) {
+      <div class="no-results">
+        <div class="no-results-icon">🔍</div>
+        <h3>Geen modules gevonden</h3>
+        <p>Probeer andere filters of wis de huidige filters.</p>
+        @if (activeFiltersCount() > 0) {
+          <button class="btn-clear-large" (click)="clearFilters()">
+            Alle filters wissen
+          </button>
+        }
+      </div>
+    }
+
+    <!-- Module Cards -->
+    @else {
+      <div class="cards-container">
+        @for (module of filteredModules(); track module.id) {
+          <div class="module-card" (click)="navigateToDetail(module.id)">
+            <!-- Favorite Button -->
+            <button
+              class="card-favorite-btn"
+              [class.is-favorite]="isFavorite(module.id)"
+              (click)="toggleFavorite($event, module.id)"
+              [title]="isFavorite(module.id) ? 'Verwijder van favorieten' : 'Toevoegen aan favorieten'"
+            >
+              {{ isFavorite(module.id) ? '⭐' : '☆' }}
+            </button>
+
+            <!-- Card Content -->
+            <div class="card-header">
+              <h3 class="card-title">{{ module.name }}</h3>
+              <div class="card-badges">
+                <span class="badge badge-credit">{{ module.studyCredit }} EC</span>
+                <span class="badge badge-level" [ngClass]="getLevelBadgeClass(module.level)">
+                  {{ module.level }}
+                </span>
+              </div>
+            </div>
+
+            <p class="card-description">{{ module.shortDescription }}</p>
+
+            <div class="card-footer">
+              <div class="card-location">
+                <span class="location-icon">📍</span>
+                <span>{{ module.location }}</span>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </main>
+</div>

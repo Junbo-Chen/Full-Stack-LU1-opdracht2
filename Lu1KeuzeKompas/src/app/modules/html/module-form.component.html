@@ -1,0 +1,204 @@
+<div class="form-container">
+  <div class="form-card">
+    <div class="form-header">
+      <h1>{{ isEditMode() ? '✏️ Module Bewerken' : '➕ Nieuwe Module' }}</h1>
+      <p>{{ isEditMode() ? 'Pas de module gegevens aan' : 'Vul de gegevens in voor de nieuwe module' }}</p>
+    </div>
+
+    @if (isLoading()) {
+      <div class="loading">
+        <div class="spinner"></div>
+        <p>Module laden...</p>
+      </div>
+    } @else {
+      <form (ngSubmit)="onSubmit()" class="module-form">
+        @if (errorMessage()) {
+          <div class="error-message">
+            ⚠️ {{ errorMessage() }}
+          </div>
+        }
+
+        <!-- Module ID (alleen bij create) -->
+        @if (!isEditMode()) {
+          <div class="form-group">
+            <label for="formId">Module ID *</label>
+            <input
+              type="number"
+              id="formId"
+              [ngModel]="formId()"
+              (ngModelChange)="formId.set($event)"
+              name="formId"
+              placeholder="Bijv. 1001"
+              required
+              [disabled]="isSaving()"
+            />
+            <small>Uniek identificatienummer voor de module</small>
+          </div>
+        }
+
+        <!-- Naam -->
+        <div class="form-group">
+          <label for="name">Naam *</label>
+          <input
+            type="text"
+            id="name"
+            [ngModel]="name()"
+            (ngModelChange)="name.set($event)"
+            name="name"
+            placeholder="Bijv. Web Development Basics"
+            required
+            [disabled]="isSaving()"
+          />
+        </div>
+
+        <!-- Korte beschrijving -->
+        <div class="form-group">
+          <label for="shortDescription">Korte Beschrijving</label>
+          <textarea
+            id="shortDescription"
+            [ngModel]="shortDescription()"
+            (ngModelChange)="shortDescription.set($event)"
+            name="shortDescription"
+            rows="2"
+            placeholder="Korte samenvatting van de module..."
+            [disabled]="isSaving()"
+          ></textarea>
+        </div>
+
+        <!-- Volledige beschrijving -->
+        <div class="form-group">
+          <label for="description">Volledige Beschrijving</label>
+          <textarea
+            id="description"
+            [ngModel]="description()"
+            (ngModelChange)="description.set($event)"
+            name="description"
+            rows="4"
+            placeholder="Uitgebreide beschrijving van de module..."
+            [disabled]="isSaving()"
+          ></textarea>
+        </div>
+
+        <!-- Inhoud -->
+        <div class="form-group">
+          <label for="content">Inhoud</label>
+          <textarea
+            id="content"
+            [ngModel]="content()"
+            (ngModelChange)="content.set($event)"
+            name="content"
+            rows="6"
+            placeholder="Gedetailleerde inhoud en lesstof..."
+            [disabled]="isSaving()"
+          ></textarea>
+        </div>
+
+        <!-- Leeruitkomsten -->
+        <div class="form-group">
+          <label for="learningOutcomes">Leeruitkomsten</label>
+          <textarea
+            id="learningOutcomes"
+            [ngModel]="learningOutcomes()"
+            (ngModelChange)="learningOutcomes.set($event)"
+            name="learningOutcomes"
+            rows="4"
+            placeholder="Wat studenten kunnen na deze module..."
+            [disabled]="isSaving()"
+          ></textarea>
+        </div>
+
+        <!-- Studiepunten -->
+        <div class="form-group">
+          <label for="studyCredit">Studiepunten (EC) *</label>
+          <select
+            id="studyCredit"
+            [ngModel]="studyCredit()"
+            (ngModelChange)="studyCredit.set($event)"
+            name="studyCredit"
+            required
+            [disabled]="isSaving()"
+          >
+            @for (credit of creditOptions; track credit) {
+              <option [ngValue]="credit">{{ credit }} EC</option>
+            }
+          </select>
+        </div>
+
+        <!-- Niveau -->
+        <div class="form-group">
+          <label for="level">Niveau *</label>
+          <select
+            id="level"
+            [ngModel]="level()"
+            (ngModelChange)="level.set($event)"
+            name="level"
+            required
+            [disabled]="isSaving()"
+          >
+            @for (lvl of levelOptions; track lvl) {
+              <option [value]="lvl">{{ lvl }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- Locatie -->
+        <div class="form-group">
+          <label for="location">Locatie *</label>
+          <select
+            id="location"
+            [ngModel]="location()"
+            (ngModelChange)="location.set($event)"
+            name="location"
+            required
+            [disabled]="isSaving()"
+          >
+            <option value="">Kies een locatie</option>
+            @for (loc of locationOptions; track loc) {
+              <option [value]="loc">{{ loc }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- Contact ID -->
+        <div class="form-group">
+          <label for="contactId">Contact ID</label>
+          <input
+            type="number"
+            id="contactId"
+            [ngModel]="contactId()"
+            (ngModelChange)="contactId.set($event)"
+            name="contactId"
+            placeholder="Optioneel contact ID"
+            [disabled]="isSaving()"
+          />
+          <small>Optioneel: ID van contactpersoon</small>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <button
+            type="button"
+            class="btn-cancel"
+            (click)="cancel()"
+            [disabled]="isSaving()"
+          >
+            Annuleren
+          </button>
+          
+          <button
+            type="submit"
+            class="btn-submit"
+            [disabled]="isSaving()"
+          >
+            @if (isSaving()) {
+              <span class="spinner-small"></span>
+              <span>{{ isEditMode() ? 'Bijwerken...' : 'Aanmaken...' }}</span>
+            } @else {
+              <span>{{ isEditMode() ? '💾 Opslaan' : '➕ Aanmaken' }}</span>
+            }
+          </button>
+        </div>
+      </form>
+    }
+  </div>
+</div>
