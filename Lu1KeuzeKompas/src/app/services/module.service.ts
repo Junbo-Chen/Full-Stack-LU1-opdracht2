@@ -11,6 +11,31 @@ export interface ModuleFilters {
   location?: string;
 }
 
+export interface CreateModuleData {
+  id: number;
+  name: string;
+  shortdescription?: string;
+  description?: string;
+  content?: string;
+  studycredit: number;
+  location: string;
+  contact_id?: number;
+  level: string;
+  learningoutcomes?: string;
+}
+
+export interface UpdateModuleData {
+  name?: string;
+  shortdescription?: string;
+  description?: string;
+  content?: string;
+  studycredit?: number;
+  location?: string;
+  contact_id?: number;
+  level?: string;
+  learningoutcomes?: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -19,14 +44,14 @@ export class ModuleService {
 
   constructor(private http: HttpClient) {}
 
-  // Get alle modules
+  // Get all modules
   getModules(): Observable<Module[]> {
     return this.http.get<any[]>(this.apiUrl).pipe(
       map(data => this.mapToModules(data))
     );
   }
 
-  // Get modules met filters
+  // Get modules with filters
   getModulesWithFilters(filters: ModuleFilters): Observable<Module[]> {
     let params = new HttpParams();
 
@@ -44,7 +69,7 @@ export class ModuleService {
       map(data => {
         let modules = this.mapToModules(data);
         
-        // Client-side search filter (voor naam en beschrijving)
+        // Client-side search filter
         if (filters.searchTerm && filters.searchTerm.trim()) {
           const searchLower = filters.searchTerm.toLowerCase();
           modules = modules.filter(m => 
@@ -73,7 +98,26 @@ export class ModuleService {
     );
   }
 
-  // Helper: Map API data naar Module entities
+  // Create new module
+  createModule(data: CreateModuleData): Observable<Module> {
+    return this.http.post<any>(this.apiUrl, data).pipe(
+      map(m => this.mapToModule(m))
+    );
+  }
+
+  // Update module
+  updateModule(id: string, data: UpdateModuleData): Observable<Module> {
+    return this.http.put<any>(`${this.apiUrl}/${id}`, data).pipe(
+      map(m => this.mapToModule(m))
+    );
+  }
+
+  // Delete module
+  deleteModule(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+
+  // Helper methods
   private mapToModules(data: any[]): Module[] {
     return data.map(m => this.mapToModule(m));
   }

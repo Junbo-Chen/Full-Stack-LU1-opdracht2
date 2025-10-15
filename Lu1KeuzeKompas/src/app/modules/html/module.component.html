@@ -3,16 +3,24 @@
   <aside class="sidebar">
     <div class="sidebar-header">
       <h2>Filters</h2>
-      @if (activeFiltersCount() > 0) {
-        <button class="btn-clear-filters" (click)="clearFilters()">
-          <span>✕ Wis alle filters</span>
-        </button>
-      }
+      <button 
+        class="btn-theme-toggle" 
+        (click)="toggleTheme()"
+        [title]="themeService.isDarkMode() ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
+      >
+        {{ themeService.isDarkMode() ? '☀️' : '🌙' }}
+      </button>
     </div>
+
+    @if (activeFiltersCount() > 0) {
+      <button class="btn-clear-filters" (click)="clearFilters()">
+        <span>✕ Wis alle filters ({{ activeFiltersCount() }})</span>
+      </button>
+    }
 
     <!-- Search -->
     <div class="filter-group">
-      <label class="filter-label">Zoeken</label>
+      <label class="filter-label">🔍 Zoeken</label>
       <input
         type="text"
         class="filter-input"
@@ -22,49 +30,70 @@
       />
     </div>
 
-    <!-- Credit Filter -->
+    <!-- Credit Filter - Checkboxes -->
     <div class="filter-group">
-      <label class="filter-label">Studiepunten</label>
-      <select
-        class="filter-select"
-        [ngModel]="selectedCredit()"
-        (ngModelChange)="selectedCredit.set($event); onFilterChange()"
-      >
-        <option [ngValue]="undefined">Alle</option>
+      <label class="filter-label">
+        📊 Studiepunten
+        @if (selectedCredits().size > 0) {
+          <span class="filter-count">({{ selectedCredits().size }})</span>
+        }
+      </label>
+      <div class="checkbox-group">
         @for (credit of availableCredits; track credit) {
-          <option [ngValue]="credit">{{ credit }} EC</option>
+          <label class="checkbox-label">
+            <input
+              type="checkbox"
+              [checked]="isCreditSelected(credit)"
+              (change)="toggleCreditFilter(credit)"
+            />
+            <span class="checkbox-text">{{ credit }} EC</span>
+          </label>
         }
-      </select>
+      </div>
     </div>
 
-    <!-- Level Filter -->
+    <!-- Level Filter - Checkboxes -->
     <div class="filter-group">
-      <label class="filter-label">Niveau</label>
-      <select
-        class="filter-select"
-        [ngModel]="selectedLevel()"
-        (ngModelChange)="selectedLevel.set($event); onFilterChange()"
-      >
-        <option value="">Alle niveaus</option>
+      <label class="filter-label">
+        📈 Niveau
+        @if (selectedLevels().size > 0) {
+          <span class="filter-count">({{ selectedLevels().size }})</span>
+        }
+      </label>
+      <div class="checkbox-group">
         @for (level of availableLevels; track level) {
-          <option [value]="level">{{ level }}</option>
+          <label class="checkbox-label">
+            <input
+              type="checkbox"
+              [checked]="isLevelSelected(level)"
+              (change)="toggleLevelFilter(level)"
+            />
+            <span class="checkbox-text">{{ level }}</span>
+          </label>
         }
-      </select>
+      </div>
     </div>
 
-    <!-- Location Filter -->
+    <!-- Location Filter - Checkboxes -->
     <div class="filter-group">
-      <label class="filter-label">Locatie</label>
-      <select
-        class="filter-select"
-        [ngModel]="selectedLocation()"
-        (ngModelChange)="selectedLocation.set($event); onFilterChange()"
-      >
-        <option value="">Alle locaties</option>
-        @for (location of availableLocations(); track location) {
-          <option [value]="location">{{ location }}</option>
+      <label class="filter-label">
+        📍 Locatie
+        @if (selectedLocations().size > 0) {
+          <span class="filter-count">({{ selectedLocations().size }})</span>
         }
-      </select>
+      </label>
+      <div class="checkbox-group">
+        @for (location of availableLocationsList(); track location) {
+          <label class="checkbox-label">
+            <input
+              type="checkbox"
+              [checked]="isLocationSelected(location)"
+              (change)="toggleLocationFilter(location)"
+            />
+            <span class="checkbox-text">{{ location }}</span>
+          </label>
+        }
+      </div>
     </div>
 
     <!-- Favorite Summary -->
@@ -77,11 +106,18 @@
       </div>
     }
 
+    <!-- Create Module Button -->
+    <button 
+      class="btn-create" 
+      (click)="navigateToCreate()"
+    >
+      ➕ Nieuwe Module
+    </button>
+
     <!-- Logout Button -->
     <button 
       class="btn-logout" 
       (click)="logout()"
-      style="width: 100%; margin-top: 20px; padding: 12px; background: #e74c3c; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600;"
     >
       🚪 Uitloggen
     </button>
@@ -122,7 +158,7 @@
     @else {
       <div class="cards-container">
         @for (module of filteredModules(); track module.id) {
-          <div class="module-card">
+          <div class="module-card" (click)="navigateToDetail(module.id)">
             <!-- Favorite Button -->
             <button
               class="card-favorite-btn"

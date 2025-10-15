@@ -1,18 +1,19 @@
 import { Component, OnInit, signal, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { ModuleService, ModuleFilters } from '../services/module.service';
 import { FavoriteService } from '../services/favorite.service';
 import { AuthService } from '../services/auth.service';
+import { ThemeService } from '../services/theme.service';
 import { Module } from '../../domain/module.entity';
 
 @Component({
   selector: 'app-modules',
   standalone: true,
-  imports: [CommonModule, FormsModule],
-  templateUrl: './module.component.html',
-  styleUrls: ['./module.component.css']
+  imports: [CommonModule, FormsModule, RouterLink],
+  templateUrl: './html/module.component.html',
+  styleUrls: ['./css/module.component.css']
 })
 export class ModulesComponent implements OnInit {
   // State signals
@@ -22,35 +23,34 @@ export class ModulesComponent implements OnInit {
 
   // Filter values
   searchTerm = signal('');
-  selectedCredit = signal<number | undefined>(undefined);
-  selectedLevel = signal<string>('');
-  selectedLocation = signal<string>('');
+  selectedCredits = signal<Set<number>>(new Set());
+  selectedLevels = signal<Set<string>>(new Set());
+  selectedLocations = signal<Set<string>>(new Set());
 
   // Available filter options
   availableCredits = [15, 30];
-  availableLevels = ['NLQF-5', 'NLQF-6'];
-  availableLocations = signal<string[]>([]);
+  availableLevels = ['NLQF5', 'NLQF6'];
+  availableLocationsList = signal<string[]>([]);
 
-  // Computed: aantal actieve filters
+  // Computed values
   activeFiltersCount = computed(() => {
     let count = 0;
     if (this.searchTerm()) count++;
-    if (this.selectedCredit()) count++;
-    if (this.selectedLevel()) count++;
-    if (this.selectedLocation()) count++;
+    if (this.selectedCredits().size > 0) count++;
+    if (this.selectedLevels().size > 0) count++;
+    if (this.selectedLocations().size > 0) count++;
     return count;
   });
 
-  // Computed: favorite count
   favoriteCount = computed(() => this.favoriteService.getFavoriteCount());
 
   constructor(
     private moduleService: ModuleService,
     public favoriteService: FavoriteService,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    public themeService: ThemeService
   ) {
-    // Effect om favorieten te laden wanneer user inlogt
     effect(() => {
       const isAuthenticated = this.authService.isAuthenticated();
       if (isAuthenticated) {
@@ -61,7 +61,6 @@ export class ModulesComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Check of gebruiker ingelogd is
     if (!this.authService.isLoggedIn()) {
       console.warn('⚠️ User not logged in, redirecting...');
       this.router.navigate(['/login']);
@@ -94,35 +93,95 @@ export class ModulesComponent implements OnInit {
 
   extractLocations(modules: Module[]): void {
     const locations = [...new Set(modules.map(m => m.location))].sort();
-    this.availableLocations.set(locations);
+    this.availableLocationsList.set(locations);
+  }
+
+  // Checkbox handlers
+  toggleCreditFilter(credit: number): void {
+    const current = new Set(this.selectedCredits());
+    if (current.has(credit)) {
+      current.delete(credit);
+    } else {
+      current.add(credit);
+    }
+    this.selectedCredits.set(current);
+    this.applyFilters();
+  }
+
+  isCreditSelected(credit: number): boolean {
+    return this.selectedCredits().has(credit);
+  }
+
+  toggleLevelFilter(level: string): void {
+    const current = new Set(this.selectedLevels());
+    if (current.has(level)) {
+      current.delete(level);
+    } else {
+      current.add(level);
+    }
+    this.selectedLevels.set(current);
+    this.applyFilters();
+  }
+
+  isLevelSelected(level: string): boolean {
+    return this.selectedLevels().has(level);
+  }
+
+  toggleLocationFilter(location: string): void {
+    const current = new Set(this.selectedLocations());
+    if (current.has(location)) {
+      current.delete(location);
+    } else {
+      current.add(location);
+    }
+    this.selectedLocations.set(current);
+    this.applyFilters();
+  }
+
+  isLocationSelected(location: string): boolean {
+    return this.selectedLocations().has(location);
   }
 
   applyFilters(): void {
-    const filters: ModuleFilters = {
-      searchTerm: this.searchTerm(),
-      studycredit: this.selectedCredit(),
-      level: this.selectedLevel(),
-      location: this.selectedLocation()
-    };
-
     this.isLoading.set(true);
-    this.moduleService.getModulesWithFilters(filters).subscribe({
-      next: (modules) => {
-        this.filteredModules.set(modules);
-        this.isLoading.set(false);
-      },
-      error: (err) => {
-        console.error('Error filtering modules:', err);
-        this.isLoading.set(false);
-      }
-    });
+    
+    // Start met alle modules
+    let filtered = [...this.allModules()];
+
+    // Search term filter
+    if (this.searchTerm().trim()) {
+      const searchLower = this.searchTerm().toLowerCase();
+      filtered = filtered.filter(m => 
+        m.name.toLowerCase().includes(searchLower) ||
+        m.shortDescription.toLowerCase().includes(searchLower) ||
+        m.description.toLowerCase().includes(searchLower)
+      );
+    }
+
+    // Credits filter
+    if (this.selectedCredits().size > 0) {
+      filtered = filtered.filter(m => this.selectedCredits().has(m.studyCredit));
+    }
+
+    // Level filter
+    if (this.selectedLevels().size > 0) {
+      filtered = filtered.filter(m => this.selectedLevels().has(m.level));
+    }
+
+    // Location filter
+    if (this.selectedLocations().size > 0) {
+      filtered = filtered.filter(m => this.selectedLocations().has(m.location));
+    }
+
+    this.filteredModules.set(filtered);
+    this.isLoading.set(false);
   }
 
   clearFilters(): void {
     this.searchTerm.set('');
-    this.selectedCredit.set(undefined);
-    this.selectedLevel.set('');
-    this.selectedLocation.set('');
+    this.selectedCredits.set(new Set());
+    this.selectedLevels.set(new Set());
+    this.selectedLocations.set(new Set());
     this.filteredModules.set(this.allModules());
   }
 
@@ -153,11 +212,15 @@ export class ModulesComponent implements OnInit {
     return this.favoriteService.isFavorite(moduleId);
   }
 
-  onSearchChange(): void {
-    this.applyFilters();
+  navigateToDetail(moduleId: string): void {
+    this.router.navigate(['/modules', moduleId]);
   }
 
-  onFilterChange(): void {
+  navigateToCreate(): void {
+    this.router.navigate(['/modules/new']);
+  }
+
+  onSearchChange(): void {
     this.applyFilters();
   }
 
@@ -173,6 +236,10 @@ export class ModulesComponent implements OnInit {
 
   getLevelBadgeClass(level: string): string {
     return level.includes('6') ? 'level-advanced' : 'level-beginner';
+  }
+
+  toggleTheme(): void {
+    this.themeService.toggleTheme();
   }
 
   logout(): void {

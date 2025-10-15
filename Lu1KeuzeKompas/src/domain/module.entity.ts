@@ -14,10 +14,6 @@ export class Module {
     public readonly updatedAt: Date,
   ) {}
 
-  public isValidLevel(): boolean {
-    const validLevels = ['beginner', 'intermediate', 'advanced'];
-    return validLevels.includes(this.level.toLowerCase());
-  }
 
   public hasMinimumCredits(): boolean {
     return this.studyCredit > 0;

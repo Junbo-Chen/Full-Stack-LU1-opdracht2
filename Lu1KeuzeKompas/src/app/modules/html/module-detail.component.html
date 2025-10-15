@@ -1,0 +1,119 @@
+<div class="detail-container">
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>Module laden...</p>
+    </div>
+  }
+
+  <!-- Error State -->
+  @else if (errorMessage()) {
+    <div class="error-container">
+      <div class="error-icon">⚠️</div>
+      <h2>{{ errorMessage() }}</h2>
+      <button class="btn-back" (click)="goBack()">
+        ← Terug naar overzicht
+      </button>
+    </div>
+  }
+
+  <!-- Module Detail -->
+  @else if (module()) {
+    <div class="detail-content">
+      <!-- Header -->
+      <div class="detail-header">
+        <button class="btn-back" (click)="goBack()">
+          ← Terug
+        </button>
+        
+        <div class="header-actions">
+          <button
+            class="btn-favorite-large"
+            [class.is-favorite]="isFavorite()"
+            (click)="toggleFavorite()"
+          >
+            {{ isFavorite() ? '⭐ Favoriet' : '☆ Toevoegen aan favorieten' }}
+          </button>
+          
+          <button 
+            class="btn-edit" 
+            [routerLink]="['/modules', module()!.id, 'edit']"
+          >
+            ✏️ Bewerken
+          </button>
+          
+          <button 
+            class="btn-delete" 
+            (click)="deleteModule()"
+          >
+            🗑️ Verwijderen
+          </button>
+        </div>
+      </div>
+
+      <!-- Module Info Card -->
+      <div class="module-card">
+        <div class="card-title-section">
+          <h1>{{ module()!.name }}</h1>
+          <div class="card-badges">
+            <span class="badge badge-credit">{{ module()!.studyCredit }} EC</span>
+            <span class="badge badge-level" [ngClass]="getLevelBadgeClass(module()!.level)">
+              {{ module()!.level }}
+            </span>
+          </div>
+        </div>
+
+        <div class="card-meta">
+          <div class="meta-item">
+            <span class="meta-icon">📍</span>
+            <span class="meta-label">Locatie:</span>
+            <span class="meta-value">{{ module()!.location }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-icon">🆔</span>
+            <span class="meta-label">Module ID:</span>
+            <span class="meta-value">{{ module()!.id }}</span>
+          </div>
+        </div>
+
+        <div class="card-section">
+          <h2>📝 Korte beschrijving</h2>
+          <p>{{ module()!.shortDescription || 'Geen korte beschrijving beschikbaar' }}</p>
+        </div>
+
+        <div class="card-section">
+          <h2>📖 Volledige beschrijving</h2>
+          <p class="description-text">
+            {{ module()!.description || 'Geen volledige beschrijving beschikbaar' }}
+          </p>
+        </div>
+
+        @if (module()!.content) {
+          <div class="card-section">
+            <h2>📚 Inhoud</h2>
+            <p class="content-text">{{ module()!.content }}</p>
+          </div>
+        }
+
+        @if (module()!.learningOutcomes) {
+          <div class="card-section">
+            <h2>🎯 Leeruitkomsten</h2>
+            <p class="outcomes-text">{{ module()!.learningOutcomes }}</p>
+          </div>
+        }
+
+        <div class="card-footer">
+          <div class="footer-item">
+            <span class="footer-label">Aangemaakt:</span>
+            <span>{{ module()!.createdAt | date:'dd-MM-yyyy HH:mm' }}</span>
+          </div>
+          <div class="footer-item">
+            <span class="footer-label">Laatst bijgewerkt:</span>
+            <span>{{ module()!.updatedAt | date:'dd-MM-yyyy HH:mm' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>
