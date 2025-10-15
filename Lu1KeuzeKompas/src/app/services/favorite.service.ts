@@ -47,25 +47,21 @@ export class FavoriteService {
     this.http.get<Favorite[]>(`${this.apiUrl}/${userId}`).pipe(
       catchError(err => {
         console.error('Error loading favorites:', err);
-        return of([]); // Return empty array on error
+        return of([]);
       })
     ).subscribe({
       next: (favorites) => {
         console.log('✅ Loaded favorites:', favorites);
         const courseIds = new Set(favorites.map(f => f.courseId));
         this.favoritesSignal.set(courseIds);
+        console.log('📊 Favorites signal updated:', courseIds.size);
       }
     });
   }
 
-  // Get alle favorieten
-  getFavorites(): Observable<Favorite[]> {
-    const userId = this.getCurrentUserId();
-    if (!userId) {
-      console.warn('⚠️ No user logged in');
-      return of([]);
-    }
-    return this.http.get<Favorite[]>(`${this.apiUrl}/${userId}`);
+  // Get alle favorieten als array
+  getFavorites(): string[] {
+    return Array.from(this.favoritesSignal());
   }
 
   // Add favorite
@@ -86,6 +82,7 @@ export class FavoriteService {
         const current = new Set(this.favoritesSignal());
         current.add(courseId);
         this.favoritesSignal.set(current);
+        console.log('📊 Favorites count:', this.favoritesSignal().size);
       }),
       catchError(err => {
         console.error('❌ Error adding favorite:', err);
@@ -114,6 +111,7 @@ export class FavoriteService {
         const current = new Set(this.favoritesSignal());
         current.delete(courseId);
         this.favoritesSignal.set(current);
+        console.log('📊 Favorites count:', this.favoritesSignal().size);
       }),
       catchError(err => {
         console.error('❌ Error removing favorite:', err);

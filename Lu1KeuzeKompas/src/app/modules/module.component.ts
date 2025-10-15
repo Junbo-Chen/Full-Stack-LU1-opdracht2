@@ -18,7 +18,6 @@ import { Module } from '../../domain/module.entity';
 export class ModulesComponent implements OnInit {
   // State signals
   allModules = signal<Module[]>([]);
-  filteredModules = signal<Module[]>([]);
   isLoading = signal(true);
 
   // Filter values
@@ -26,11 +25,49 @@ export class ModulesComponent implements OnInit {
   selectedCredits = signal<Set<number>>(new Set());
   selectedLevels = signal<Set<string>>(new Set());
   selectedLocations = signal<Set<string>>(new Set());
+  showOnlyFavorites = signal(false);
 
   // Available filter options
   availableCredits = [15, 30];
   availableLevels = ['NLQF5', 'NLQF6'];
   availableLocationsList = signal<string[]>([]);
+
+  // ✅ COMPUTED - Niet signal!
+  filteredModules = computed(() => {
+    let filtered = [...this.allModules()];
+
+    // Search term filter
+    if (this.searchTerm().trim()) {
+      const searchLower = this.searchTerm().toLowerCase();
+      filtered = filtered.filter(m => 
+        m.name.toLowerCase().includes(searchLower) ||
+        m.shortDescription.toLowerCase().includes(searchLower) ||
+        m.description.toLowerCase().includes(searchLower)
+      );
+    }
+
+    // Credits filter
+    if (this.selectedCredits().size > 0) {
+      filtered = filtered.filter(m => this.selectedCredits().has(m.studyCredit));
+    }
+
+    // Level filter
+    if (this.selectedLevels().size > 0) {
+      filtered = filtered.filter(m => this.selectedLevels().has(m.level));
+    }
+
+    // Location filter
+    if (this.selectedLocations().size > 0) {
+      filtered = filtered.filter(m => this.selectedLocations().has(m.location));
+    }
+
+    // Favorites filter
+    if (this.showOnlyFavorites()) {
+      filtered = filtered.filter(m => this.favoriteService.isFavorite(m.id));
+    }
+
+    return filtered;
+  });
 
   // Computed values
   activeFiltersCount = computed(() => {
@@ -39,6 +76,7 @@ export class ModulesComponent implements OnInit {
     if (this.selectedCredits().size > 0) count++;
     if (this.selectedLevels().size > 0) count++;
     if (this.selectedLocations().size > 0) count++;
+    if (this.showOnlyFavorites()) count++; // ✅ NIEUW
     return count;
   });
 
@@ -80,7 +118,6 @@ export class ModulesComponent implements OnInit {
       next: (modules) => {
         console.log('📚 Loaded modules:', modules.length);
         this.allModules.set(modules);
-        this.filteredModules.set(modules);
         this.extractLocations(modules);
         this.isLoading.set(false);
       },
@@ -105,7 +142,6 @@ export class ModulesComponent implements OnInit {
       current.add(credit);
     }
     this.selectedCredits.set(current);
-    this.applyFilters();
   }
 
   isCreditSelected(credit: number): boolean {
@@ -120,7 +156,6 @@ export class ModulesComponent implements OnInit {
       current.add(level);
     }
     this.selectedLevels.set(current);
-    this.applyFilters();
   }
 
   isLevelSelected(level: string): boolean {
@@ -135,46 +170,10 @@ export class ModulesComponent implements OnInit {
       current.add(location);
     }
     this.selectedLocations.set(current);
-    this.applyFilters();
   }
 
   isLocationSelected(location: string): boolean {
     return this.selectedLocations().has(location);
-  }
-
-  applyFilters(): void {
-    this.isLoading.set(true);
-    
-    // Start met alle modules
-    let filtered = [...this.allModules()];
-
-    // Search term filter
-    if (this.searchTerm().trim()) {
-      const searchLower = this.searchTerm().toLowerCase();
-      filtered = filtered.filter(m => 
-        m.name.toLowerCase().includes(searchLower) ||
-        m.shortDescription.toLowerCase().includes(searchLower) ||
-        m.description.toLowerCase().includes(searchLower)
-      );
-    }
-
-    // Credits filter
-    if (this.selectedCredits().size > 0) {
-      filtered = filtered.filter(m => this.selectedCredits().has(m.studyCredit));
-    }
-
-    // Level filter
-    if (this.selectedLevels().size > 0) {
-      filtered = filtered.filter(m => this.selectedLevels().has(m.level));
-    }
-
-    // Location filter
-    if (this.selectedLocations().size > 0) {
-      filtered = filtered.filter(m => this.selectedLocations().has(m.location));
-    }
-
-    this.filteredModules.set(filtered);
-    this.isLoading.set(false);
   }
 
   clearFilters(): void {
@@ -182,7 +181,7 @@ export class ModulesComponent implements OnInit {
     this.selectedCredits.set(new Set());
     this.selectedLevels.set(new Set());
     this.selectedLocations.set(new Set());
-    this.filteredModules.set(this.allModules());
+    this.showOnlyFavorites.set(false);
   }
 
   toggleFavorite(event: Event, moduleId: string): void {
@@ -221,7 +220,7 @@ export class ModulesComponent implements OnInit {
   }
 
   onSearchChange(): void {
-    this.applyFilters();
+    // Filters worden automatisch toegepast via computed
   }
 
   getResultText(): string {
@@ -240,6 +239,11 @@ export class ModulesComponent implements OnInit {
 
   toggleTheme(): void {
     this.themeService.toggleTheme();
+  }
+
+  // ✅ NIEUW: Toggle favorites filter
+  toggleFavoritesFilter(): void {
+    this.showOnlyFavorites.set(!this.showOnlyFavorites());
   }
 
   logout(): void {

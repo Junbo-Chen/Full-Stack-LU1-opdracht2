@@ -96,14 +96,17 @@
       </div>
     </div>
 
-    <!-- Favorite Summary -->
+    <!-- Favorite Summary - KLIKBAAR -->
     @if (favoriteCount() > 0) {
-      <div class="favorite-summary">
+      <button 
+        class="favorite-summary"
+        [class.active]="showOnlyFavorites()"
+        (click)="toggleFavoritesFilter()"
+        title="Klik om alleen favorieten te tonen"
+      >
         <div class="favorite-icon">⭐</div>
-        <div class="favorite-text">
           <strong>{{ favoriteCount() }}</strong> favoriet{{ favoriteCount() !== 1 ? 'en' : '' }}
-        </div>
-      </div>
+      </button>
     }
 
     <!-- Create Module Button -->
