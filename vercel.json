@@ -1,9 +1,10 @@
-[build]
-command = "ng build --configuration production"
-publish = "dist/lu1-keuzekompas/browser"
-base = "Lu1KeuzeKompas"
-
-[[redirects]]
-from = "/*"
-to = "/index.html"
-status = 200
+{
+  "buildCommand": "ng build --configuration production",
+  "outputDirectory": "Lu1KeuzeKompas/dist/lu1-keuzekompas",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
