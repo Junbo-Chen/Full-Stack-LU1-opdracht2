@@ -1,4 +1,4 @@
 export const environment = {
-  production: false,
-  backendUrl: 'http://localhost:3000'
+  production: true,
+  backendUrl: 'https://full-stack-lu1-opdracht2.onrender.com/'
 };

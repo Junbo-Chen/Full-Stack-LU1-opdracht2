@@ -7,7 +7,11 @@ async function bootstrap() {
 
   // CORS inschakelen voor Angular frontend
   app.enableCors({
-    origin: 'http://localhost:4200', // Angular frontend URL
+    origin: [
+      'http://localhost:4200', // Angular frontend
+      'https://lu1keuzekompas.netlify.app/',
+      'https://localhost:3000',
+    ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });
