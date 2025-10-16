@@ -9,7 +9,8 @@ async function bootstrap() {
   app.enableCors({
     origin: [
       'http://localhost:4200',
-      'https://lu1keuzekompas.netlify.app',  // JE NETLIFY URL
+      'https://junbo-chen.github.io',
+      'https://junbo-chen.github.io/Full-Stack-LU1-opdracht2',
       'https://full-stack-lu1-opdracht2.onrender.com'
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
