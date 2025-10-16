@@ -1,6 +1,6 @@
 {
   "buildCommand": "ng build --configuration production",
-  "outputDirectory": "Lu1KeuzeKompas/dist/lu1-keuzekompas",
+  "outputDirectory": "Lu1KeuzeKompas/dist/lu1-keuzekompas/browser",
   "rewrites": [
     {
       "source": "/(.*)",
