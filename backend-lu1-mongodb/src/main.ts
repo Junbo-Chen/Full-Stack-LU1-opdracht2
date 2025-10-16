@@ -8,9 +8,9 @@ async function bootstrap() {
   // CORS inschakelen voor Angular frontend
   app.enableCors({
     origin: [
-      'http://localhost:4200', // Angular frontend
-      'https://lu1keuzekompas.netlify.app/',
-      'https://localhost:3000',
+      'http://localhost:4200',
+      'https://lu1keuzekompas.netlify.app',  // JE NETLIFY URL
+      'https://full-stack-lu1-opdracht2.onrender.com'
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
