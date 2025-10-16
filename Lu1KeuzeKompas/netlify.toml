@@ -1,6 +1,6 @@
 [build]
 command = "ng build --configuration production"
-publish = "dist/lu1-keuzekompas"
+publish = "dist/lu1-keuzekompas/browser"
 base = "Lu1KeuzeKompas"
 
 [[redirects]]
