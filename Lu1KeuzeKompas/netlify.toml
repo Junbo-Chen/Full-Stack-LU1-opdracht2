@@ -1,8 +1,9 @@
 [build]
-  publish = "dist/lu1-keuzekompas"
-  command = "ng build --configuration production"
+command = "ng build --configuration production"
+publish = "dist/lu1-keuzekompas"
+base = "Lu1KeuzeKompas"
 
 [[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+from = "/*"
+to = "/index.html"
+status = 200
