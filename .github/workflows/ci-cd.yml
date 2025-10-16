@@ -22,7 +22,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22.19.0'
 
       - name: Install dependencies
         working-directory: Lu1KeuzeKompas
@@ -67,7 +67,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          nnode-version: '22.19.0'
 
       - name: Install dependencies
         working-directory: backend-lu1-mongodb
@@ -98,7 +98,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: '22.19.0'
 
       - name: Install dependencies
         working-directory: Lu1KeuzeKompas
