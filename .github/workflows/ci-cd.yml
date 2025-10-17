@@ -1,4 +1,4 @@
-# .github/workflows/ci-cd.yml
+# .github/workflows/ci-cd.yml - FIXED
 
 name: CI/CD Pipeline
 
@@ -10,53 +10,110 @@ on:
 
 jobs:
   # ============================================
-  # FRONTEND TESTS
+  # FRONTEND TESTS & BUILD
   # ============================================
   frontend-test:
     runs-on: ubuntu-latest
     name: Frontend - Test & Build
+    timeout-minutes: 45
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22.19.0'
+          cache: 'npm'
+          cache-dependency-path: Lu1KeuzeKompas/package-lock.json
 
       - name: Install dependencies
         working-directory: Lu1KeuzeKompas
         run: npm ci
-        
+
       - name: Install Playwright browsers
         working-directory: Lu1KeuzeKompas
-        run: npx playwright install --with-deps
+        run: npx playwright install --with-deps chromium
 
       - name: Build Angular
         working-directory: Lu1KeuzeKompas
         run: npm run build
+        env:
+          CI: true
+          NODE_ENV: production
 
-      - name: Run E2E tests
+      # ⚠️ CRITICAL: Start dev server BEFORE tests
+      - name: Start dev server
+        working-directory: Lu1KeuzeKompas
+        run: |
+          npm run start > server.log 2>&1 &
+          SERVER_PID=$!
+          echo "SERVER_PID=$SERVER_PID" >> $GITHUB_ENV
+          sleep 15
+        timeout-minutes: 2
+
+      # Wait for server to be ready
+      - name: Wait for server to be ready
+        run: |
+          for i in {1..30}; do
+            if curl -s http://localhost:4200 > /dev/null 2>&1; then
+              echo "✅ Server is ready!"
+              exit 0
+            fi
+            echo "⏳ Waiting for server... ($i/30)"
+            sleep 2
+          done
+          echo "❌ Server failed to start"
+          cat Lu1KeuzeKompas/server.log
+          exit 1
+
+      # Run E2E tests against LOCAL server
+      - name: Run E2E tests (local)
         working-directory: Lu1KeuzeKompas
         run: npm run e2e -- --project=chromium
+        env:
+          CI: true
+          BASE_URL: http://localhost:4200
+          API_URL: https://full-stack-lu1-opdracht2.onrender.com
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: false
+        timeout-minutes: 30
 
-      - name: Upload test results
+      # Upload test reports
+      - name: Upload Playwright report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report
           path: Lu1KeuzeKompas/playwright-report/
+          retention-days: 30
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: Lu1KeuzeKompas/test-results/
+          retention-days: 30
+
+      # Show server logs if tests failed
+      - name: Show server logs (if failed)
+        if: failure()
+        working-directory: Lu1KeuzeKompas
+        run: |
+          echo "=== SERVER LOG ==="
+          cat server.log || echo "No server log found"
 
   # ============================================
-  # BACKEND TESTS
+  # BACKEND TESTS & BUILD
   # ============================================
   backend-test:
     runs-on: ubuntu-latest
     name: Backend - Test & Build
+    timeout-minutes: 30
 
     services:
       mongodb:
-        image: mongo:latest
+        image: mongo:7.0
         options: >-
           --health-cmd mongosh
           --health-interval 10s
@@ -66,12 +123,14 @@ jobs:
           - 27017:27017
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          nnode-version: '22.19.0'
+          node-version: '22.19.0'
+          cache: 'npm'
+          cache-dependency-path: backend-lu1-mongodb/package-lock.json
 
       - name: Install dependencies
         working-directory: backend-lu1-mongodb
@@ -80,12 +139,25 @@ jobs:
       - name: Build NestJS
         working-directory: backend-lu1-mongodb
         run: npm run build
+        env:
+          CI: true
+          NODE_ENV: production
 
-      - name: Run tests
+      - name: Run unit tests
         working-directory: backend-lu1-mongodb
         run: npm test
         env:
-          MONGO_URI: mongodb://localhost:27017/test
+          MONGO_URI: mongodb://localhost:27017/test-db
+          JWT_SECRET: test-secret-key
+          NODE_ENV: test
+
+      - name: Upload test coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage
+          path: backend-lu1-mongodb/coverage/
+          retention-days: 30
 
   # ============================================
   # FRONTEND DEPLOY (GitHub Pages)
@@ -95,14 +167,21 @@ jobs:
     name: Frontend - Deploy to GitHub Pages
     needs: frontend-test
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    timeout-minutes: 15
+
+    permissions:
+      contents: read
+      deployments: write
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: '22.19.0'
+          cache: 'npm'
+          cache-dependency-path: Lu1KeuzeKompas/package-lock.json
 
       - name: Install dependencies
         working-directory: Lu1KeuzeKompas
@@ -110,12 +189,35 @@ jobs:
 
       - name: Build for production
         working-directory: Lu1KeuzeKompas
-        run: ng build --configuration production --base-href "/Full-Stack-LU1-opdracht2/"
+        run: npm run build -- --configuration production --base-href "/Full-Stack-LU1-opdracht2/"
+        env:
+          CI: true
+          NODE_ENV: production
 
       - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./Lu1KeuzeKompas/dist/lu1-keuzekompas/browser
+          cname: ''
+
+  # ============================================
+  # BACKEND DEPLOY (Render)
+  # ============================================
+  backend-deploy:
+    runs-on: ubuntu-latest
+    name: Backend - Deploy to Render
+    needs: backend-test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Trigger Render deployment
         run: |
-          cd Lu1KeuzeKompas
-          npm install -D gh-pages
-          npx gh-pages -d dist/lu1-keuzekompas/browser
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          curl --request POST \
+            --url https://api.render.com/v1/services/${{ secrets.RENDER_SERVICE_ID }}/deploys \
+            --header "Accept: application/json" \
+            --header "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}"
+        continue-on-error: true

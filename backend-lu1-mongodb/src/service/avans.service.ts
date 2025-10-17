@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Module, ModuleDocument } from '../schema/avansopdracht.schema';
-import { CreateModuleDto, UpdateModuleDto } from '../dto/module.dto';
+import { Module, ModuleDocument } from '../infrastructure/database/avansopdracht.schema';
+import { CreateModuleDto, UpdateModuleDto } from '../presentation/dto/module.dto';
 
 @Injectable()
 export class ModuleService {

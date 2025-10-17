@@ -5,10 +5,10 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
 // ⬇️ importeer hier je feature-modules
-import { AvansModule } from './modules/avansopdracht/avans.module';
-import { FavoritesModule } from './modules/favorite/favorite.module';
-import { UsersModule } from './modules/users/users.module';
-import { AuthModule } from './modules/auth/auth.module';
+import { AvansModule } from './modules/avans.module';
+import { FavoritesModule } from './modules/favorite.module';
+import { UsersModule } from './modules/users.module';
+import { AuthModule } from './infrastructure/auth/auth.module';
 
 @Module({
   imports: [

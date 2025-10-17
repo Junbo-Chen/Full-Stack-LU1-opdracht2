@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Put, Delete, Param, Query, Body, UseGuards } from '@nestjs/common';
 import { ModuleService } from '../../service/avans.service';
-import { CreateModuleDto, UpdateModuleDto } from '../../dto/module.dto';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { CreateModuleDto, UpdateModuleDto } from '../../presentation/dto/module.dto';
+import { JwtAuthGuard } from '../../infrastructure/auth/jwt-auth.guard';
 
 @UseGuards(JwtAuthGuard)
 @Controller('modules')
