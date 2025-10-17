@@ -27,6 +27,10 @@ jobs:
       - name: Install dependencies
         working-directory: Lu1KeuzeKompas
         run: npm ci
+        
+    - name: Install Playwright browsers
+        working-directory: Lu1KeuzeKompas
+        run: npx playwright install --with-deps
 
       - name: Build Angular
         working-directory: Lu1KeuzeKompas
