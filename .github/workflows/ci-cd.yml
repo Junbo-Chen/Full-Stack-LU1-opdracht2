@@ -28,7 +28,7 @@ jobs:
         working-directory: Lu1KeuzeKompas
         run: npm ci
         
-    - name: Install Playwright browsers
+      - name: Install Playwright browsers
         working-directory: Lu1KeuzeKompas
         run: npx playwright install --with-deps
 
