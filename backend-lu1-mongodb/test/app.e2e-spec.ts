@@ -2,8 +2,8 @@
 
 import { test, expect } from '@playwright/test';
 
-const BASE_URL = 'http://localhost:4200';
-const API_URL = 'http://localhost:3000';
+const BASE_URL = 'https://junbo-chen.github.io/Full-Stack-LU1-opdracht2';
+const API_URL = 'https://full-stack-lu1-opdracht2.onrender.com';
 
 // Test data
 const testUser = {
